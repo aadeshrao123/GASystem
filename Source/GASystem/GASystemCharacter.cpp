@@ -10,6 +10,11 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystem/Attribute/GAS_AttributeSetBase.h"
+#include "AbilitySystem/Component/GAS_AbilitySystemComponent.h"
+
 
 //////////////////////////////////////////////////////////////////////////
 // AGASystemCharacter
@@ -49,7 +54,20 @@ AGASystemCharacter::AGASystemCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	//AbilitySystem
+	AbilitySystemComponent = CreateDefaultSubobject<UGAS_AbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AbilitySystemComponent->SetIsReplicated(true);
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
+
+	AttributeSetBase = CreateDefaultSubobject<UGAS_AttributeSetBase>(TEXT("AttributeSet"));
 }
+
+UAbilitySystemComponent* AGASystemCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
 
 void AGASystemCharacter::BeginPlay()
 {
@@ -122,6 +140,78 @@ void AGASystemCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+
+bool AGASystemCharacter::ApplyGameplayEffectToSelf(TSubclassOf<UGameplayEffect> Effect,
+	FGameplayEffectContextHandle InEffectContext)
+{
+	if (Effect.Get()) return false;
+	FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(Effect, 1, InEffectContext);
+
+	if (SpecHandle.IsValid())
+	{
+		
+		FActiveGameplayEffectHandle ActiveGEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+		return ActiveGEHandle.WasSuccessfullyApplied();
+		
+	}
+	return false;
+}
+
+void AGASystemCharacter::InitializeAttributes()
+{
+	if (GetLocalRole() == ROLE_Authority && DefaultAttributeSet && AttributeSetBase)
+	{
+		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+		EffectContext.AddSourceObject(this);
+
+		ApplyGameplayEffectToSelf(DefaultAttributeSet, EffectContext);
+	}
+}
+
+void AGASystemCharacter::GiveAbilities()
+{
+	if (HasAuthority() && AbilitySystemComponent)
+	{
+		for (auto DefaultAbility : DefaultAbilities)
+		{
+			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(DefaultAbility));
+		}
+	}
+}
+
+void AGASystemCharacter::ApplyStartupEffects()
+{
+	if (GetLocalRole() == ROLE_Authority && DefaultAttributeSet && AttributeSetBase)
+	{
+		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+		EffectContext.AddSourceObject(this);
+
+		for (auto CharacterEffects : DefaultEffects)
+		{
+			ApplyGameplayEffectToSelf(DefaultAttributeSet, EffectContext);
+		}
+	}
+}
+
+void AGASystemCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+	InitializeAttributes();
+	GiveAbilities();
+	ApplyStartupEffects();
+}
+
+void AGASystemCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+	InitializeAttributes();
 }
 
 
