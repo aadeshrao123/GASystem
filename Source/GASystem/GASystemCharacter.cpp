@@ -146,7 +146,8 @@ void AGASystemCharacter::Look(const FInputActionValue& Value)
 bool AGASystemCharacter::ApplyGameplayEffectToSelf(TSubclassOf<UGameplayEffect> Effect,
 	FGameplayEffectContextHandle InEffectContext)
 {
-	if (Effect.Get()) return false;
+	if (!Effect.Get()) return false;
+
 	FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(Effect, 1, InEffectContext);
 
 	if (SpecHandle.IsValid())
@@ -183,14 +184,14 @@ void AGASystemCharacter::GiveAbilities()
 
 void AGASystemCharacter::ApplyStartupEffects()
 {
-	if (GetLocalRole() == ROLE_Authority && DefaultAttributeSet && AttributeSetBase)
+	if (GetLocalRole() == ROLE_Authority)
 	{
 		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
 		EffectContext.AddSourceObject(this);
 
 		for (auto CharacterEffects : DefaultEffects)
 		{
-			ApplyGameplayEffectToSelf(DefaultAttributeSet, EffectContext);
+			ApplyGameplayEffectToSelf(CharacterEffects, EffectContext);
 		}
 	}
 }
