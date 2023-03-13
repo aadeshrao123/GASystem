@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "GASGameTypes.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "Abilities/GameplayAbility.h"
@@ -48,6 +49,8 @@ class AGASystemCharacter : public ACharacter, public IAbilitySystemInterface
 public:
 	AGASystemCharacter();
 
+	virtual void PostInitializeComponents() override;
+	
 	// Override for IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
@@ -64,7 +67,7 @@ protected:
 	void Look(const FInputActionValue& Value);
 
 	// Initializes the character's attributes
-	void InitializeAttributes();
+	//void InitializeAttributes();
 
 	// Gives the character its default abilities
 	void GiveAbilities();
@@ -75,15 +78,17 @@ protected:
 	// Overrides for AActor
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
-
+	/*
 	UPROPERTY(BlueprintReadOnly,EditDefaultsOnly ,Category = "GAS")
 	TSubclassOf<UGameplayEffect> DefaultAttributeSet;
 
+	
 	UPROPERTY(BlueprintReadOnly,EditDefaultsOnly ,Category = "GAS")
 	TArray<TSubclassOf<UGameplayAbility>> DefaultAbilities;
 
 	UPROPERTY(BlueprintReadOnly,EditDefaultsOnly ,Category = "GAS")
 	TArray<TSubclassOf<UGameplayEffect>> DefaultEffects;
+	*/
 
 	UPROPERTY(EditDefaultsOnly)
 	UGAS_AbilitySystemComponent* AbilitySystemComponent;
@@ -103,4 +108,24 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+public:
+	UFUNCTION(BlueprintCallable)
+	FCharacterData GetCharacterData() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetCharacterData(const FCharacterData& InCharacterData);
+
+protected:
+	UPROPERTY(Replicated = OnRep_CharacterData)
+	FCharacterData CharacterData;
+
+	UFUNCTION()
+	void OnRep_CharacterData();
+	
+	virtual void InitFromCharacterData(const FCharacterData& InCharacterData, bool bFromReplication = false);
+
+	UPROPERTY(EditDefaultsOnly)
+	class UCharacterDataAsset* CharacterDataAsset;
+
 };
