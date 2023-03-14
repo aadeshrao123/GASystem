@@ -14,6 +14,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/Attribute/GAS_AttributeSetBase.h"
 #include "AbilitySystem/Component/GAS_AbilitySystemComponent.h"
+#include "ActorComponent/GASCharacterMovementComponent.h"
 #include "DataAssets/CharacterDataAsset.h"
 #include "Net/UnrealNetwork.h"
 
@@ -21,7 +22,8 @@
 //////////////////////////////////////////////////////////////////////////
 // AGASystemCharacter
 
-AGASystemCharacter::AGASystemCharacter()
+AGASystemCharacter::AGASystemCharacter(const FObjectInitializer& ObjectInitializer) :
+Super(ObjectInitializer.SetDefaultSubobjectClass<UGASCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
