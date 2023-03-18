@@ -95,6 +95,9 @@ protected:
 
 	UPROPERTY(Transient)
 	UGAS_AttributeSetBase* AttributeSetBase;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UGASFootstepsComponent* FootstepsComponent;
 	
 protected:
 	// Overrides for APawn
@@ -116,6 +119,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetCharacterData(const FCharacterData& InCharacterData);
 
+	class UGASFootstepsComponent* GetFootstepsComponent() const;
 protected:
 	UPROPERTY(Replicated = OnRep_CharacterData)
 	FCharacterData CharacterData;

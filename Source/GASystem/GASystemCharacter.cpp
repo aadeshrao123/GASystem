@@ -15,6 +15,7 @@
 #include "AbilitySystem/Attribute/GAS_AttributeSetBase.h"
 #include "AbilitySystem/Component/GAS_AbilitySystemComponent.h"
 #include "ActorComponent/GASCharacterMovementComponent.h"
+#include "ActorComponent/GASFootstepsComponent.h"
 #include "DataAssets/CharacterDataAsset.h"
 #include "Net/UnrealNetwork.h"
 
@@ -65,6 +66,8 @@ Super(ObjectInitializer.SetDefaultSubobjectClass<UGASCharacterMovementComponent>
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
 
 	AttributeSetBase = CreateDefaultSubobject<UGAS_AttributeSetBase>(TEXT("AttributeSet"));
+
+	FootstepsComponent = CreateDefaultSubobject<UGASFootstepsComponent>(TEXT("FootstepsComponent"));
 }
 
 void AGASystemCharacter::PostInitializeComponents()
@@ -107,6 +110,11 @@ void AGASystemCharacter::SetCharacterData(const FCharacterData& InCharacterData)
 	CharacterData = InCharacterData;
 	
 	InitFromCharacterData(CharacterData);
+}
+
+UGASFootstepsComponent* AGASystemCharacter::GetFootstepsComponent() const
+{
+	return FootstepsComponent;
 }
 
 void AGASystemCharacter::OnRep_CharacterData()
