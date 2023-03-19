@@ -56,7 +56,8 @@ public:
 	
 	// Applies a gameplay effect to the character's ability system component
 	bool ApplyGameplayEffectToSelf(TSubclassOf<UGameplayEffect> Effect, FGameplayEffectContextHandle InEffectContext);
-	
+
+	virtual void Landed(const FHitResult& Hit) override;
 
 protected:
 
@@ -66,9 +67,13 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
+	void OnJumpActionStarted(const FInputActionValue& Value);
+
+	void OnJumpActionEnded(const FInputActionValue& Value);
 	// Initializes the character's attributes
 	//void InitializeAttributes();
 
+	
 	// Gives the character its default abilities
 	void GiveAbilities();
 
@@ -132,4 +137,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	class UCharacterDataAsset* CharacterDataAsset;
 
+	//Gameplay Events
+
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag JumpEventTag;
+
+	//GameplayTags
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTagContainer InAirTags;
 };

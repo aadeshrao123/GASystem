@@ -143,8 +143,8 @@ void AGASystemCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
 		
 		//Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AGASystemCharacter::OnJumpActionStarted);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AGASystemCharacter::OnJumpActionEnded);
 
 		//Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGASystemCharacter::Move);
@@ -192,9 +192,25 @@ void AGASystemCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+void AGASystemCharacter::OnJumpActionStarted(const FInputActionValue& Value)
+{
+	FGameplayEventData Payload;
+
+	Payload.Instigator = this;
+	Payload.EventTag = JumpEventTag;
+
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, JumpEventTag, Payload);
+	
+}
+
+void AGASystemCharacter::OnJumpActionEnded(const FInputActionValue& Value)
+{
+	//StopJumping();
+}
+
 
 bool AGASystemCharacter::ApplyGameplayEffectToSelf(TSubclassOf<UGameplayEffect> Effect,
-	FGameplayEffectContextHandle InEffectContext)
+                                                   FGameplayEffectContextHandle InEffectContext)
 {
 	if (!Effect.Get()) return false;
 
@@ -208,6 +224,15 @@ bool AGASystemCharacter::ApplyGameplayEffectToSelf(TSubclassOf<UGameplayEffect> 
 		
 	}
 	return false;
+}
+
+void AGASystemCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->RemoveActiveEffectsWithTags(InAirTags);
+	}
 }
 
 /*void AGASystemCharacter::InitializeAttributes()
