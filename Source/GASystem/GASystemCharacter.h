@@ -45,6 +45,9 @@ class AGASystemCharacter : public ACharacter, public IAbilitySystemInterface
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* CrouchInputAction;
 
 public:
 	AGASystemCharacter(const FObjectInitializer& ObjectInitializer);
@@ -59,6 +62,10 @@ public:
 
 	virtual void Landed(const FHitResult& Hit) override;
 
+	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+
+	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+
 protected:
 
 	/** Called for movement input */
@@ -70,6 +77,10 @@ protected:
 	void OnJumpActionStarted(const FInputActionValue& Value);
 
 	void OnJumpActionEnded(const FInputActionValue& Value);
+	
+	void OnCrouchActionStarted(const FInputActionValue& Value);
+
+	void OnCrouchActionEnded(const FInputActionValue& Value);
 	// Initializes the character's attributes
 	//void InitializeAttributes();
 
@@ -145,4 +156,12 @@ protected:
 	//GameplayTags
 	UPROPERTY(EditDefaultsOnly)
 	FGameplayTagContainer InAirTags;
+	
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTagContainer CrouchTags;
+
+	//Gameplay Effects
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UGameplayEffect> CrouchStateEffect;
 };

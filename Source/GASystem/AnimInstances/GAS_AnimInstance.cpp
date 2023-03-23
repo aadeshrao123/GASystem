@@ -33,3 +33,32 @@ UAnimSequenceBase* UGAS_AnimInstance::GetIdleAnimation() const
 	UE_LOG(LogTemp, Warning, TEXT("null idle"));
 	return DefaultCharacterAnimDataAsset ? DefaultCharacterAnimDataAsset-> CharacterAnimationData.IdleAnimationAsset : nullptr;
 }
+
+
+UBlendSpace* UGAS_AnimInstance::GetCrouchLocomotionBlendspace() const
+{
+	if(AGASystemCharacter* GASCharacter = Cast<AGASystemCharacter>(GetOwningActor()))
+	{
+		FCharacterData Data = GASCharacter->GetCharacterData();
+		if (Data.CharacterAnimDataAsset)
+		{
+			return Data.CharacterAnimDataAsset->CharacterAnimationData.CrouchBlendspace;
+		}
+	}
+	UE_LOG(LogTemp, Warning, TEXT("null blendspace"));
+	return DefaultCharacterAnimDataAsset ? DefaultCharacterAnimDataAsset->CharacterAnimationData.CrouchBlendspace : nullptr;
+}
+
+UAnimSequenceBase* UGAS_AnimInstance::GetCrouchIdleAnimation() const
+{
+	if(AGASystemCharacter* GASCharacter = Cast<AGASystemCharacter>(GetOwningActor()))
+	{
+		FCharacterData Data = GASCharacter->GetCharacterData();
+		if (Data.CharacterAnimDataAsset)
+		{
+			return Data.CharacterAnimDataAsset->CharacterAnimationData.CrouchIdleAnimationAsset;
+		}
+	}
+	UE_LOG(LogTemp, Warning, TEXT("null idle"));
+	return DefaultCharacterAnimDataAsset ? DefaultCharacterAnimDataAsset-> CharacterAnimationData.CrouchIdleAnimationAsset : nullptr;
+}

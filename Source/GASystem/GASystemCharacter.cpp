@@ -146,6 +146,10 @@ void AGASystemCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AGASystemCharacter::OnJumpActionStarted);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AGASystemCharacter::OnJumpActionEnded);
 
+		//Couching
+		EnhancedInputComponent->BindAction(CrouchInputAction, ETriggerEvent::Started, this, &AGASystemCharacter::OnCrouchActionStarted);
+		EnhancedInputComponent->BindAction(CrouchInputAction, ETriggerEvent::Completed, this, &AGASystemCharacter::OnCrouchActionEnded);
+
 		//Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGASystemCharacter::Move);
 
@@ -208,6 +212,24 @@ void AGASystemCharacter::OnJumpActionEnded(const FInputActionValue& Value)
 	//StopJumping();
 }
 
+void AGASystemCharacter::OnCrouchActionStarted(const FInputActionValue& Value)
+{
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->TryActivateAbilitiesByTag(CrouchTags, true);
+	}
+}
+
+void AGASystemCharacter::OnCrouchActionEnded(const FInputActionValue& Value)
+{
+
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->CancelAbilities(&CrouchTags);
+	}
+
+}
+
 
 bool AGASystemCharacter::ApplyGameplayEffectToSelf(TSubclassOf<UGameplayEffect> Effect,
                                                    FGameplayEffectContextHandle InEffectContext)
@@ -233,6 +255,43 @@ void AGASystemCharacter::Landed(const FHitResult& Hit)
 	{
 		AbilitySystemComponent->RemoveActiveEffectsWithTags(InAirTags);
 	}
+}
+
+void AGASystemCharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
+{
+	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+
+	if (!CrouchStateEffect.Get()) return;
+	
+	if (AbilitySystemComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Issuefdf"));
+
+		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+
+		FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(CrouchStateEffect, 1, EffectContext);
+		if (SpecHandle.IsValid())
+		{
+			FActiveGameplayEffectHandle ActiveGEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+			if (!ActiveGEHandle.WasSuccessfullyApplied())
+			{
+				UE_LOG(LogTemp, Error, TEXT("Failed to apply Crouch effect! %s"), *GetNameSafe(CrouchStateEffect));
+			}
+		}
+	}
+}
+
+void AGASystemCharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
+{
+
+	if (AbilitySystemComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Issuefdf"));
+
+		AbilitySystemComponent->RemoveActiveGameplayEffectBySourceEffect(CrouchStateEffect, AbilitySystemComponent);
+	}
+	Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+	
 }
 
 /*void AGASystemCharacter::InitializeAttributes()
