@@ -67,6 +67,8 @@ Super(ObjectInitializer.SetDefaultSubobjectClass<UGASCharacterMovementComponent>
 
 	AttributeSetBase = CreateDefaultSubobject<UGAS_AttributeSetBase>(TEXT("AttributeSet"));
 
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSetBase->GetMaxMovementSpeedAttribute()).AddUObject(this, &AGASystemCharacter::OnMaxMovementSpeedChanged);
+	
 	FootstepsComponent = CreateDefaultSubobject<UGASFootstepsComponent>(TEXT("FootstepsComponent"));
 }
 
@@ -137,6 +139,11 @@ void AGASystemCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 //////////////////////////////////////////////////////////////////////////
 // Input
 
+void AGASystemCharacter::OnMaxMovementSpeedChanged(const FOnAttributeChangeData& Data)
+{
+	GetCharacterMovement()->MaxWalkSpeed = Data.NewValue;
+}
+
 void AGASystemCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings
@@ -146,9 +153,13 @@ void AGASystemCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AGASystemCharacter::OnJumpActionStarted);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AGASystemCharacter::OnJumpActionEnded);
 
-		//Couching
+		//Crouching
 		EnhancedInputComponent->BindAction(CrouchInputAction, ETriggerEvent::Started, this, &AGASystemCharacter::OnCrouchActionStarted);
 		EnhancedInputComponent->BindAction(CrouchInputAction, ETriggerEvent::Completed, this, &AGASystemCharacter::OnCrouchActionEnded);
+
+		//Sprinting
+		EnhancedInputComponent->BindAction(SprintInputAction, ETriggerEvent::Started, this, &AGASystemCharacter::OnSprintActionStarted);
+		EnhancedInputComponent->BindAction(SprintInputAction, ETriggerEvent::Completed, this, &AGASystemCharacter::OnSprintActionEnded);
 
 		//Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGASystemCharacter::Move);
@@ -226,6 +237,23 @@ void AGASystemCharacter::OnCrouchActionEnded(const FInputActionValue& Value)
 	if (AbilitySystemComponent)
 	{
 		AbilitySystemComponent->CancelAbilities(&CrouchTags);
+	}
+
+}
+
+void AGASystemCharacter::OnSprintActionStarted(const FInputActionValue& Value)
+{
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->TryActivateAbilitiesByTag(SprintTags, true);
+	}
+}
+
+void AGASystemCharacter::OnSprintActionEnded(const FInputActionValue& Value)
+{
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->CancelAbilities(&SprintTags);
 	}
 
 }

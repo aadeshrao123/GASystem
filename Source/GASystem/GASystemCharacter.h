@@ -48,6 +48,9 @@ class AGASystemCharacter : public ACharacter, public IAbilitySystemInterface
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* CrouchInputAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* SprintInputAction;
 
 public:
 	AGASystemCharacter(const FObjectInitializer& ObjectInitializer);
@@ -81,6 +84,10 @@ protected:
 	void OnCrouchActionStarted(const FInputActionValue& Value);
 
 	void OnCrouchActionEnded(const FInputActionValue& Value);
+
+	void OnSprintActionStarted(const FInputActionValue& Value);
+
+	void OnSprintActionEnded(const FInputActionValue& Value);
 	// Initializes the character's attributes
 	//void InitializeAttributes();
 
@@ -114,7 +121,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	class UGASFootstepsComponent* FootstepsComponent;
-	
+
 protected:
 	// Overrides for APawn
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -136,6 +143,9 @@ public:
 	void SetCharacterData(const FCharacterData& InCharacterData);
 
 	class UGASFootstepsComponent* GetFootstepsComponent() const;
+
+	void OnMaxMovementSpeedChanged(const FOnAttributeChangeData& Data);
+
 protected:
 	UPROPERTY(Replicated = OnRep_CharacterData)
 	FCharacterData CharacterData;
@@ -159,9 +169,14 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly)
 	FGameplayTagContainer CrouchTags;
+	
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTagContainer SprintTags;
 
 	//Gameplay Effects
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UGameplayEffect> CrouchStateEffect;
+
+	FDelegateHandle MaxMovementSpeedChangedDelegateHandle;
 };
