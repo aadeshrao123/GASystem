@@ -16,6 +16,7 @@
 #include "AbilitySystem/Component/GAS_AbilitySystemComponent.h"
 #include "ActorComponent/GASCharacterMovementComponent.h"
 #include "ActorComponent/GASFootstepsComponent.h"
+#include "ActorComponent/GAS_MotionWarpingComponent.h"
 #include "DataAssets/CharacterDataAsset.h"
 #include "Net/UnrealNetwork.h"
 
@@ -46,6 +47,9 @@ Super(ObjectInitializer.SetDefaultSubobjectClass<UGASCharacterMovementComponent>
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 
+	GASCharacterMovementComponent = Cast<UGASCharacterMovementComponent>(GetCharacterMovement());
+
+	
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -70,6 +74,9 @@ Super(ObjectInitializer.SetDefaultSubobjectClass<UGASCharacterMovementComponent>
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSetBase->GetMaxMovementSpeedAttribute()).AddUObject(this, &AGASystemCharacter::OnMaxMovementSpeedChanged);
 	
 	FootstepsComponent = CreateDefaultSubobject<UGASFootstepsComponent>(TEXT("FootstepsComponent"));
+
+	GASMotionWarpingComponent = CreateDefaultSubobject<UGAS_MotionWarpingComponent>(TEXT("GASMotionWrappingComponent"));
+	
 }
 
 void AGASystemCharacter::PostInitializeComponents()
@@ -209,13 +216,7 @@ void AGASystemCharacter::Look(const FInputActionValue& Value)
 
 void AGASystemCharacter::OnJumpActionStarted(const FInputActionValue& Value)
 {
-	FGameplayEventData Payload;
-
-	Payload.Instigator = this;
-	Payload.EventTag = JumpEventTag;
-
-	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, JumpEventTag, Payload);
-	
+	GASCharacterMovementComponent->TryTraversal(AbilitySystemComponent);
 }
 
 void AGASystemCharacter::OnJumpActionEnded(const FInputActionValue& Value)
@@ -320,6 +321,11 @@ void AGASystemCharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHei
 	}
 	Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
 	
+}
+
+UGAS_MotionWarpingComponent* AGASystemCharacter::GetGASMotionWarpingComponent() const
+{
+	return GASMotionWarpingComponent;
 }
 
 /*void AGASystemCharacter::InitializeAttributes()

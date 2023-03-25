@@ -6,6 +6,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GASCharacterMovementComponent.generated.h"
 
+class UAbilitySystemComponent;
+class UGameplayAbility;
+
+
 /**
  * 
  */
@@ -13,5 +17,11 @@ UCLASS()
 class GASYSTEM_API UGASCharacterMovementComponent : public UCharacterMovementComponent
 {
 	GENERATED_BODY()
+public:
+	bool TryTraversal(UAbilitySystemComponent* ASC);
 	
+protected:
+	UPROPERTY(EditDefaultsOnly)
+	TArray<TSubclassOf<UGameplayAbility>> TraversaAbilitiesOrdered;
+
 };

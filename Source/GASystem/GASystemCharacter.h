@@ -17,6 +17,9 @@ class UGAS_AttributeSetBase;
 class UGameplayEffect;
 class UGameplayAbility;
 
+class UGAS_MotionWarpingComponent;
+class UGASCharacterMovementComponent;
+
 UCLASS(config=Game)
 class AGASystemCharacter : public ACharacter, public IAbilitySystemInterface
 {
@@ -69,6 +72,8 @@ public:
 
 	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 
+	UGAS_MotionWarpingComponent* GetGASMotionWarpingComponent() const;
+	UGASCharacterMovementComponent* GASCharacterMovementComponent;
 protected:
 
 	/** Called for movement input */
@@ -121,6 +126,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	class UGASFootstepsComponent* FootstepsComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MotionWrap)
+	UGAS_MotionWarpingComponent* GASMotionWarpingComponent;
 
 protected:
 	// Overrides for APawn
