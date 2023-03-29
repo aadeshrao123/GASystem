@@ -9,9 +9,6 @@
 
 class UAbilityTask_PlayMontageAndWait;
 
-/**
- * 
- */
 UCLASS()
 class GASYSTEM_API UGA_Vault : public UGAS_GameplayAbility
 {
@@ -19,7 +16,7 @@ class GASYSTEM_API UGA_Vault : public UGAS_GameplayAbility
 
 	UGA_Vault();
 
-	virtual bool CommitCheck(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, FGameplayTagContainer* OptionalRelevantTags) override;
+	virtual bool CommitCheck(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,OUT FGameplayTagContainer* OptionalRelevantTags) override;
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 

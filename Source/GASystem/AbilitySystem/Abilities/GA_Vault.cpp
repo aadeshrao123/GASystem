@@ -20,7 +20,7 @@ UGA_Vault::UGA_Vault()
 }
 
 bool UGA_Vault::CommitCheck(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-                            const FGameplayAbilityActivationInfo ActivationInfo, FGameplayTagContainer* OptionalRelevantTags)
+                            const FGameplayAbilityActivationInfo ActivationInfo, OUT FGameplayTagContainer* OptionalRelevantTags)
 {
 	if(!Super::CommitCheck(Handle, ActorInfo, ActivationInfo, OptionalRelevantTags))
 	{
@@ -169,13 +169,13 @@ void UGA_Vault::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 			CapsuleComponent->SetCollisionResponseToChannel(Channel, ECollisionResponse::ECR_Ignore);
 		}
 	}
-	UGAS_MotionWarpingComponent* MotionWarpingComponent = Character ? Character->GetGASMotionWarpingComponent() : nullptr;
+	/*UGAS_MotionWarpingComponent* MotionWarpingComponent = Character ? Character->GetGASMotionWarpingComponent() : nullptr;
 
 	if (MotionWarpingComponent)
 	{
 		MotionWarpingComponent->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("JumpToLocation"), JumpToLocation, Character->GetActorRotation());
 		MotionWarpingComponent->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("JumpOverLocation"), JumpOverLocation, Character->GetActorRotation());
-	}
+	}*/
 	
 	MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, VaultMontage);
 
@@ -213,13 +213,14 @@ void UGA_Vault::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGamep
 		CharacterMovement->SetMovementMode(MOVE_Falling);
 	}
 
+	/*
 	UGAS_MotionWarpingComponent* MotionWarpingComponent = Character ? Character->GetGASMotionWarpingComponent() : nullptr;
 
 	if (MotionWarpingComponent)
 	{
 		MotionWarpingComponent->RemoveWarpTarget(TEXT("JumpToLocation"));
 		MotionWarpingComponent->RemoveWarpTarget(TEXT("JumpOverLocation"));
-	}
+	}*/
 
 	
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
