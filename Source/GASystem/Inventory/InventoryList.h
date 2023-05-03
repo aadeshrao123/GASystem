@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -30,6 +30,8 @@ struct FInventoryList : public FFastArraySerializer
 	}
 	void AddItem(TSubclassOf<UItemStaticData> ItemStaticDataClass);
 	void RemoveItem(TSubclassOf<UItemStaticData> ItemStaticDataClass);
+
+	TArray<FInventoryListItem>& GetItemsRef() {return Items;}
 
 protected:
 	UPROPERTY()

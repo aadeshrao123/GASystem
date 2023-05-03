@@ -2,11 +2,18 @@
 
 
 #include "InventoryItemInstance.h"
+
+#include "GASGameStatics.h"
 #include "Net/UnrealNetwork.h"
 
 void UInventoryItemInstance::Init(TSubclassOf<UItemStaticData> InItemStaticDataClass)
 {
 	ItemStaticDataClass = InItemStaticDataClass;
+}
+
+const UItemStaticData* UInventoryItemInstance::GetItemStaticData() const
+{
+	return UGASGameStatics::GetItemStaticData(ItemStaticDataClass);
 }
 
 void UInventoryItemInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

@@ -18,6 +18,7 @@
 #include "ActorComponent/GASFootstepsComponent.h"
 #include "ActorComponent/GAS_MotionWarpingComponent.h"
 #include "DataAssets/CharacterDataAsset.h"
+#include "Inventory/InventoryComponent.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -76,7 +77,9 @@ Super(ObjectInitializer.SetDefaultSubobjectClass<UGASCharacterMovementComponent>
 	FootstepsComponent = CreateDefaultSubobject<UGASFootstepsComponent>(TEXT("FootstepsComponent"));
 
 	GASMotionWarpingComponent = CreateDefaultSubobject<UGAS_MotionWarpingComponent>(TEXT("GASMotionWrappingComponent"));
-	
+
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+	InventoryComponent->SetIsReplicated(true);
 }
 
 void AGASystemCharacter::PostInitializeComponents()
@@ -141,6 +144,7 @@ void AGASystemCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AGASystemCharacter, CharacterData);
+	DOREPLIFETIME(AGASystemCharacter, InventoryComponent);
 }
 
 //////////////////////////////////////////////////////////////////////////

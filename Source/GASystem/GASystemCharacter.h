@@ -19,6 +19,7 @@ class UGameplayAbility;
 
 class UGAS_MotionWarpingComponent;
 class UGASCharacterMovementComponent;
+class UInventoryComponent;
 
 UCLASS(config=Game)
 class AGASystemCharacter : public ACharacter, public IAbilitySystemInterface
@@ -187,4 +188,9 @@ protected:
 	TSubclassOf<UGameplayEffect> CrouchStateEffect;
 
 	FDelegateHandle MaxMovementSpeedChangedDelegateHandle;
+
+	//Inventory
+
+	UPROPERTY(EditAnywhere ,Replicated)
+	UInventoryComponent* InventoryComponent = nullptr;
 };

@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class GASYSTEM_API UInventoryItemInstance : public UObject
 {
 	GENERATED_BODY()
@@ -21,6 +21,9 @@ public:
 
 	virtual bool IsSupportedForNetworking() const override {return true;}
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	const UItemStaticData* GetItemStaticData() const;
+	
 	UPROPERTY(Replicated)
 	TSubclassOf<UItemStaticData> ItemStaticDataClass;
 
@@ -32,5 +35,4 @@ public:
 
 	virtual void OnEquipped() {};
 	virtual void OnUnEquppied() {};
-	
 };
