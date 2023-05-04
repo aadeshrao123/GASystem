@@ -74,9 +74,68 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	}
 }
 
+void UInventoryComponent::AddItem(TSubclassOf<UItemStaticData> InItemStaticDataClass)
+{
+	InventoryList.AddItem(InItemStaticDataClass);
+}
+
+void UInventoryComponent::RemoveItem(TSubclassOf<UItemStaticData> InItemStaticDataClass)
+{
+	InventoryList.RemoveItem(InItemStaticDataClass);
+}
+
+void UInventoryComponent::EquipItem(TSubclassOf<UItemStaticData> InItemStaticDataClass)
+{
+	if (GetOwner()->HasAuthority())
+	{
+		for (auto Item : InventoryList.GetItemsRef())
+		{
+			if(Item.ItemInstance->ItemStaticDataClass == InItemStaticDataClass)
+			{
+				Item.ItemInstance->OnEquipped(GetOwner());
+				CurrentItem = Item.ItemInstance;
+				break;
+			}
+		}
+	}
+}
+
+void UInventoryComponent::UnEquipItem()
+{
+	if (GetOwner()->HasAuthority())
+	{
+		if (IsValid(CurrentItem))
+		{
+			CurrentItem->OnUnEquppied();
+			CurrentItem = nullptr;
+		}
+	}
+}
+
+void UInventoryComponent::DropItem()
+{
+	if (GetOwner()->HasAuthority())
+	{
+		if (IsValid(CurrentItem))
+		{
+			CurrentItem->OnDropped();
+			RemoveItem(CurrentItem->ItemStaticDataClass);
+			CurrentItem = nullptr;
+		}
+	}
+}
+
+UInventoryItemInstance* UInventoryComponent::GetEquippedItem() const
+{
+	return CurrentItem;
+}
+
+
 void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UInventoryComponent, InventoryList);
+	DOREPLIFETIME(UInventoryComponent, CurrentItem);
+	
 }

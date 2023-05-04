@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GASGameTypes.h"
 #include "InventoryList.generated.h"
 
 class UItemStaticData;

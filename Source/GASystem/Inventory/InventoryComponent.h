@@ -20,6 +20,24 @@ public:
 	virtual void InitializeComponent() override;
 	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 
+	UFUNCTION(BlueprintCallable)
+	void AddItem(TSubclassOf<UItemStaticData> InItemStaticDataClass);
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveItem(TSubclassOf<UItemStaticData> InItemStaticDataClass);
+
+	UFUNCTION(BlueprintCallable)
+	void EquipItem(TSubclassOf<UItemStaticData> InItemStaticDataClass);
+
+	UFUNCTION(BlueprintCallable)
+	void UnEquipItem();
+
+	UFUNCTION(BlueprintCallable)
+	void DropItem();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UInventoryItemInstance* GetEquippedItem() const;
+	
 protected:
 
 	UPROPERTY(Replicated)
@@ -27,6 +45,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly)
 	TArray<TSubclassOf<UItemStaticData>> DefaultsItems;
+
+	UPROPERTY(Replicated)
+	UInventoryItemInstance* CurrentItem = nullptr;
 
 public:	
 	// Called every frame

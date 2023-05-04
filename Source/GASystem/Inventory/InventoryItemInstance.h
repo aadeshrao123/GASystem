@@ -17,7 +17,7 @@ class GASYSTEM_API UInventoryItemInstance : public UObject
 
 public:
 	
-	virtual void Init(TSubclassOf<UItemStaticData> ItemStaticDataClass);
+	virtual void Init(TSubclassOf<UItemStaticData> InItemStaticDataClass);
 
 	virtual bool IsSupportedForNetworking() const override {return true;}
 
@@ -31,8 +31,14 @@ public:
 	bool bEquipped = false;
 
 	UFUNCTION()
-	void OnRep_Equipped() {};
+	void OnRep_Equipped();
 
-	virtual void OnEquipped() {};
-	virtual void OnUnEquppied() {};
+	virtual void OnEquipped(AActor* InOwner = nullptr);
+	virtual void OnUnEquppied();
+	virtual void OnDropped();
+
+protected:
+
+	UPROPERTY(Replicated)
+	AItemActor* ItemActor = nullptr;
 };
