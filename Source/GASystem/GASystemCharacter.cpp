@@ -178,6 +178,15 @@ void AGASystemCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 		//Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGASystemCharacter::Look);
 
+		//Jumping
+		EnhancedInputComponent->BindAction(EquipNextInputAction, ETriggerEvent::Triggered, this, &AGASystemCharacter::OnEquipNextTriggered);
+		
+		//Crouching
+		EnhancedInputComponent->BindAction(DropItemInputAction, ETriggerEvent::Triggered, this, &AGASystemCharacter::OnDropItemTriggered);
+
+		//Sprinting
+		EnhancedInputComponent->BindAction(SprintInputAction, ETriggerEvent::Triggered, this, &AGASystemCharacter::OnUnEquipTriggered);
+
 	}
 
 }
@@ -261,6 +270,30 @@ void AGASystemCharacter::OnSprintActionEnded(const FInputActionValue& Value)
 		AbilitySystemComponent->CancelAbilities(&SprintTags);
 	}
 
+}
+
+void AGASystemCharacter::OnDropItemTriggered(const FInputActionValue& Value)
+{
+	FGameplayEventData EventPayload;
+	EventPayload.EventTag = UInventoryComponent::DropItemTag;
+
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, UInventoryComponent::DropItemTag, EventPayload);
+}
+
+void AGASystemCharacter::OnEquipNextTriggered(const FInputActionValue& Value)
+{
+	FGameplayEventData EventPayload;
+	EventPayload.EventTag = UInventoryComponent::EquipNextTag;
+
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, UInventoryComponent::DropItemTag, EventPayload);
+}
+
+void AGASystemCharacter::OnUnEquipTriggered(const FInputActionValue& Value)
+{
+	FGameplayEventData EventPayload;
+	EventPayload.EventTag = UInventoryComponent::UnEquipTag;
+
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, UInventoryComponent::DropItemTag, EventPayload);
 }
 
 

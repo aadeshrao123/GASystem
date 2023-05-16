@@ -32,6 +32,8 @@ void UInventoryItemInstance::OnEquipped(AActor* InOwner)
 		FTransform Transform;
 		ItemActor =	World->SpawnActorDeferred<AItemActor>(StaticData->ItemActorClass, Transform, InOwner);
 		ItemActor->Init(this);
+
+		ItemActor->OnEquipped();
 		
 		ItemActor->FinishSpawning(Transform);
 
@@ -42,6 +44,8 @@ void UInventoryItemInstance::OnEquipped(AActor* InOwner)
 			UE_LOG(LogTemp, Warning, TEXT("Something happening"))
 		}
 	}
+	bEquipped = true;
+
 }
 
 void UInventoryItemInstance::OnUnEquppied()
@@ -51,6 +55,8 @@ void UInventoryItemInstance::OnUnEquppied()
 		ItemActor->Destroy();
 		ItemActor = nullptr;
 	}
+
+	bEquipped = false;
 }
 
 void UInventoryItemInstance::OnDropped()
@@ -59,6 +65,7 @@ void UInventoryItemInstance::OnDropped()
 	{
 		ItemActor->OnDropped();
 	}
+	bEquipped = false;
 }
 
 void UInventoryItemInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

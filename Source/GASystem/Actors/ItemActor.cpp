@@ -5,6 +5,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Engine/ActorChannel.h"
+#include "Inventory/InventoryComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Inventory/InventoryItemInstance.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -15,6 +16,7 @@ AItemActor::AItemActor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+	SetReplicateMovement(true);
 
 	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("USphereComponent"));
 	SphereComponent->SetupAttachment(RootComponent);
@@ -31,19 +33,22 @@ void AItemActor::OnEquipped()
 {
 	ItemState = EItemState::Equipped;
 	SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SphereComponent->SetGenerateOverlapEvents(false);
 }
 
 void AItemActor::OnUnEquipped()
 {
 	ItemState = EItemState::None;
 	SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
+	SphereComponent->SetGenerateOverlapEvents(false);
 }
 
 void AItemActor::OnDropped()
 {
 	ItemState = EItemState::Dropped;
 	SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	SphereComponent->SetGenerateOverlapEvents(true);
+
 
 
 	GetRootComponent()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
@@ -52,11 +57,11 @@ void AItemActor::OnDropped()
 		const FVector Location = GetActorLocation();
 		const FVector Forward = ActorOwner->GetActorForwardVector();
 
-		const float droppItemDist = 100.f;
-		const float droppItemTraceDist = 10000.f;
+		const float DropItemDist = 100.f;
+		const float DropItemTraceDist = 10000.f;
 
-		const FVector TraceStart = Location + Forward * droppItemDist;
-		const FVector TraceEnd = TraceStart - FVector::UpVector * droppItemTraceDist;
+		const FVector TraceStart = Location + Forward * DropItemDist;
+		const FVector TraceEnd = TraceStart - FVector::UpVector * DropItemTraceDist;
 
 		TArray<AActor*> ActorsToIgnore = { GetOwner() };
 
@@ -65,27 +70,57 @@ void AItemActor::OnDropped()
 		static const auto CVar = IConsoleManager::Get().FindConsoleVariable(TEXT("ShowDebugInventory"));
 		const bool bShowInventory = CVar->GetInt() > 0;
 
+		FVector TargetLocation = TraceEnd;
+
 		EDrawDebugTrace::Type DebugDrawType = bShowInventory ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
 		if (UKismetSystemLibrary::LineTraceSingleByProfile(this, TraceStart, TraceEnd, TEXT("WorldStatic"), true, ActorsToIgnore, DebugDrawType, TraceHit, true))
 		{
 			if (TraceHit.bBlockingHit)
 			{
-				SetActorLocation(TraceHit.Location);
-				return;
+				TargetLocation = TraceHit.Location;
 			}
 		}
 
-		SetActorLocation(TraceEnd);
+		SetActorLocation(TargetLocation);
+
+		SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		SphereComponent->SetGenerateOverlapEvents(true);
+
+	}
+}
+
+void AItemActor::OnRep_ItemState()
+{
+	switch (ItemState)
+	{
+	case EItemState::Equipped:
+
+		SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SphereComponent->SetGenerateOverlapEvents(false);
+
+		break;
+		
+
+		default:
+			SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			SphereComponent->SetGenerateOverlapEvents(true);
+			break;
+		
 	}
 }
 
 void AItemActor::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                                 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	FGameplayEventData EventPayload;
-	EventPayload.OptionalObject = this;
-	
-	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(OtherActor, OverlapEventTag, EventPayload);
+	if (HasAuthority())
+	{
+		FGameplayEventData EventPayload;
+		EventPayload.Instigator = this;
+		EventPayload.OptionalObject = ItemInstance;
+		EventPayload.EventTag = UInventoryComponent::EquipItemActorTag;
+		
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(OtherActor, UInventoryComponent::EquipItemActorTag, EventPayload);
+	}
 }
 
 bool AItemActor::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
@@ -100,7 +135,18 @@ bool AItemActor::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, F
 void AItemActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	if (HasAuthority())
+	{
+		if (!IsValid(ItemInstance) && IsValid(ItemStaticDataClass))
+		{
+			ItemInstance = NewObject<UInventoryItemInstance>();
+			ItemInstance->Init(ItemStaticDataClass);
+
+			SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			SphereComponent->SetGenerateOverlapEvents(true);
+		}
+	}
 }
 
 

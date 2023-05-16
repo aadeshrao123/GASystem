@@ -56,6 +56,15 @@ class AGASystemCharacter : public ACharacter, public IAbilitySystemInterface
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* SprintInputAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* DropItemInputAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* EquipNextInputAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* UnEquipInputAction;
+
 public:
 	AGASystemCharacter(const FObjectInitializer& ObjectInitializer);
 
@@ -94,6 +103,13 @@ protected:
 	void OnSprintActionStarted(const FInputActionValue& Value);
 
 	void OnSprintActionEnded(const FInputActionValue& Value);
+
+	void OnDropItemTriggered(const FInputActionValue& Value);
+
+	void OnEquipNextTriggered(const FInputActionValue& Value);
+
+	void OnUnEquipTriggered(const FInputActionValue& Value);
+
 	// Initializes the character's attributes
 	//void InitializeAttributes();
 

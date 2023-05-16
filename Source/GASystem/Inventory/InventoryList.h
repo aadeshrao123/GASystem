@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GASGameTypes.h"
+#include "Net/Serialization/FastArraySerializer.h"
 #include "InventoryList.generated.h"
 
 class UItemStaticData;
@@ -30,6 +31,9 @@ struct FInventoryList : public FFastArraySerializer
 		return FFastArraySerializer::FastArrayDeltaSerialize<FInventoryListItem, FInventoryList>(Items, DeltaParams, *this);
 	}
 	void AddItem(TSubclassOf<UItemStaticData> ItemStaticDataClass);
+	
+	void AddItem(UInventoryItemInstance* InItemInstance);
+	
 	void RemoveItem(TSubclassOf<UItemStaticData> ItemStaticDataClass);
 
 	TArray<FInventoryListItem>& GetItemsRef() {return Items;}

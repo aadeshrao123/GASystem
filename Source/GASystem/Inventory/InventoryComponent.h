@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Inventory/InventoryList.h"
+#include "Abilities/GameplayAbilityTypes.h"
 #include "InventoryComponent.generated.h"
 
 
@@ -22,12 +23,18 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void AddItem(TSubclassOf<UItemStaticData> InItemStaticDataClass);
+	
+	UFUNCTION(BlueprintCallable)
+	void AddItemInstance(UInventoryItemInstance* InItemInstance);
 
 	UFUNCTION(BlueprintCallable)
 	void RemoveItem(TSubclassOf<UItemStaticData> InItemStaticDataClass);
 
 	UFUNCTION(BlueprintCallable)
 	void EquipItem(TSubclassOf<UItemStaticData> InItemStaticDataClass);
+	
+	UFUNCTION(BlueprintCallable)
+	void EquipItemInstance(UInventoryItemInstance* InItemInstance);
 
 	UFUNCTION(BlueprintCallable)
 	void UnEquipItem();
@@ -35,8 +42,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DropItem();
 
+	UFUNCTION(BlueprintCallable)
+	void EquipNext();
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	UInventoryItemInstance* GetEquippedItem() const;
+
+	virtual void GameplayEventCallback(const FGameplayEventData* Payload);
+
+	static FGameplayTag EquipItemActorTag;
+	static FGameplayTag DropItemTag;
+	static FGameplayTag EquipNextTag;
+	static FGameplayTag UnEquipTag;
 	
 protected:
 
@@ -48,6 +65,16 @@ protected:
 
 	UPROPERTY(Replicated)
 	UInventoryItemInstance* CurrentItem = nullptr;
+
+	UFUNCTION()
+	void AddInventoryTags();
+
+	FDelegateHandle TagDelegateHandle;
+
+	void HandleGameplayEventInternal(FGameplayEventData Payload);
+
+	UFUNCTION(Server, Reliable)
+	void ServerHandleGameplayEvent(FGameplayEventData Payload);
 
 public:	
 	// Called every frame
